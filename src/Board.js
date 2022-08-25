@@ -30,47 +30,77 @@ export default class Board extends React.Component {
   }
 
   componentDidMount() {
-    Dragula([
+    this.drake = Dragula([
       this.swimlanes.backlog.current,
       this.swimlanes.inProgress.current,
       this.swimlanes.complete.current,
-    ]).on("drop", (el, target) => {
+    ]);
+
+    this.drake.on("drop", (el, target, source, sibling) => {
       const value = target.attributes[1].value;
       const id = el.getAttribute("data-id");
-      this.handleState(value, id);
+      this.handleState(value, id, source, sibling);
 
       return;
     });
   }
 
-  handleState(value, id) {
-    const oldclients = this.getClients();
+  handleState(value, id, source, sibling) {
+    this.drake.cancel(true);
+    const oldclients = [
+      ...this.state.clients.backlog,
+      ...this.state.clients.inProgress,
+      ...this.state.clients.complete,
+    ];
+
+    const selected = [];
 
     oldclients.forEach((task) => {
       if (task.id == id) {
-        task.status = value;
+        const temp = task;
+        temp.status = value;
+        selected.push(temp);
         return;
       }
     });
 
+    const removedtemp = oldclients.filter((task) => {
+      return task.id !== selected[0].id;
+    });
+
+    // find sibling
+    const index = removedtemp.findIndex((task) => {
+      if (sibling) {
+        return task.id == sibling.dataset.id;
+      }
+    });
+
+    if (index == -1) {
+      console.log("not found");
+      removedtemp.splice(removedtemp.length, 0, selected[0]);
+    } else if (index !== -1) {
+      console.log("found");
+      removedtemp.splice(index, 0, selected[0]);
+    }
+
     // change state
     const newstate = {
       clients: {
-        backlog: oldclients.filter(
+        backlog: removedtemp.filter(
           (client) => !client.status || client.status === "backlog"
         ),
-        inProgress: oldclients.filter(
+        inProgress: removedtemp.filter(
           (client) => client.status && client.status === "in-progress"
         ),
-        complete: oldclients.filter(
+        complete: removedtemp.filter(
           (client) => client.status && client.status === "complete"
         ),
       },
     };
 
-    // this.setState((prev) => {
-    //   return { ...prev, ...newstate };
-    // });
+    this.setState((prev) => {
+      return { ...newstate };
+    });
   }
 
   getClients() {
