@@ -76,10 +76,8 @@ export default class Board extends React.Component {
     });
 
     if (index == -1) {
-      console.log("not found");
       removedtemp.splice(removedtemp.length, 0, selected[0]);
     } else if (index !== -1) {
-      console.log("found");
       removedtemp.splice(index, 0, selected[0]);
     }
 
@@ -214,7 +212,6 @@ export default class Board extends React.Component {
   }
 
   render() {
-    console.log("ran");
     return (
       <div className="Board">
         <div className="container-fluid">

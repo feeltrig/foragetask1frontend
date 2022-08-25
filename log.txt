@@ -1,2 +1,1 @@
-unable to change state without running into errors.
-i am able to change colors if any siblings are present by mutating class names
+it was difficult to learn dragula as documentation was confusing and all errors were cleared up after checking the solution.
